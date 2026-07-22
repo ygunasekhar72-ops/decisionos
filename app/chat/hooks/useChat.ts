@@ -4,12 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createAssistantReply, chatSuggestions } from '@/app/chat/lib/chat';
 import { createConversation, createConversationTitle, LocalStorageConversationRepository } from '@/app/chat/lib/chat/storage';
 import type { ChatConversation, ChatMessage, ChatSuggestion } from '@/app/chat/types/chat';
+import { useStudentContext } from "@/context/StudentContext";
 
 const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const repository = new LocalStorageConversationRepository();
 
 export function useChat() {
+  const { studentProfile } = useStudentContext();
+
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -129,7 +132,10 @@ export function useChat() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ message: value }),
+          body: JSON.stringify({ 
+            message: value,
+          studentProfile,
+         }),
         });
 
         const data = (await response.json()) as { success?: boolean; reply?: string; error?: string };

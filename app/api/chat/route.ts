@@ -5,11 +5,21 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, studentProfile } = await request.json();
+
+    const systemPrompt = `You are DecisionOS Mentor, an expert AI career guidance assistant. Provide accurate and honest career guidance. Never invent facts. Clearly admit uncertainty when necessary. Give practical and actionable advice. Encourage critical thinking. Keep responses concise, professional, and easy to understand.`;
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: message }],
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+    role: "system",
+    content: `Student Profile:
+${JSON.stringify(studentProfile, null, 2)}`,
+  },
+  { role: "user", content: message },
+],
       temperature: 0.7,
     });
 
